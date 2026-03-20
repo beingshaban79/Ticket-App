@@ -13,6 +13,11 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { BLEPrinter } from 'react-native-thermal-receipt-printer';
 
+
+
+
+
+
 export default function App() {
   const [isConnected, setIsConnected] = useState(false);
   const [printers, setPrinters] = useState([]);
