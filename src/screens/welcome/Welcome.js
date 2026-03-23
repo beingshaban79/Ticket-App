@@ -14,7 +14,7 @@ import styles from "./Styles";
 import AppInput from "../../components/TextInput/TextInput";
 import AppButton from "../../components/Button/Button";
 
-const Welcome = () => {
+const Welcome = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
@@ -60,7 +60,7 @@ const Welcome = () => {
               size="md"
               label="LOGIN"
               style={{ marginTop: 20 }}
-              onPress={() => { }}
+              onPress={() => navigation.navigate('App')}
             />
           </ScrollView>
         </TouchableWithoutFeedback>
