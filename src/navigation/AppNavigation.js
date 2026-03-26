@@ -14,7 +14,6 @@ export default function AppNavigation() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarShowLabel: true,
         tabBarActiveTintColor: "#137fec",
         tabBarInactiveTintColor: "#9e9e9e",
         tabBarStyle: {
@@ -30,18 +29,14 @@ export default function AppNavigation() {
           fontWeight: "600",
         },
         tabBarIcon: ({ color, size }) => {
-          const icons = {
-            Home: "home",
-            Reports: "description",
-            Support: "help",
-          };
+          const icons = { Home: "home", Reports: "description", Support: "help" };
           return <MaterialIcons name={icons[route.name]} size={size} color={color} />;
         },
       })}
     >
       <Tab.Screen name="Home"    component={HomeStack} />
-      <Tab.Screen name="Reports" component={Reports} />
-      <Tab.Screen name="Support" component={Support} />
+      <Tab.Screen name="Reports" component={Reports}   />
+      <Tab.Screen name="Support" component={Support}   />
     </Tab.Navigator>
   );
 }

@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import styles from "./Styles";
 import RouteCard from "../../components/RouteCard/RouteCard";
+import RouteConfirmModal from "../../components/RouteConfirmModal/RouteConfirmModal";
 
 const ROUTES = [
   { id: "1", routeName: "Route 45B",  from: "Majestic",        to: "Electronic City" },
@@ -14,13 +15,30 @@ const ROUTES = [
 ];
 
 const RouteSelection = ({ navigation }) => {
-  const [search, setSearch] = useState("");
+  const [search, setSearch]           = useState("");
+  const [selectedRoute, setSelectedRoute] = useState(null);
+  const [modalVisible, setModalVisible]   = useState(false);
 
   const filtered = ROUTES.filter((r) =>
     r.routeName.toLowerCase().includes(search.toLowerCase()) ||
     r.from.toLowerCase().includes(search.toLowerCase()) ||
     r.to.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleCardPress = (route) => {
+    setSelectedRoute(route);
+    setModalVisible(true);
+  };
+
+  const handleConfirm = () => {
+    setModalVisible(false);
+    navigation.navigate("TicketBooking", { routeName: selectedRoute?.routeName });
+  };
+
+  const handleCancel = () => {
+    setModalVisible(false);
+    setSelectedRoute(null);
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -60,7 +78,7 @@ const RouteSelection = ({ navigation }) => {
             routeName={route.routeName}
             from={route.from}
             to={route.to}
-            onPress={() => {}}
+            onPress={() => handleCardPress(route)}
           />
         ))}
 
@@ -68,6 +86,14 @@ const RouteSelection = ({ navigation }) => {
           <Text style={styles.emptyText}>No routes found.</Text>
         )}
       </ScrollView>
+
+      {/* Confirm Modal */}
+      <RouteConfirmModal
+        visible={modalVisible}
+        routeName={selectedRoute?.routeName}
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
+      />
 
     </SafeAreaView>
   );
