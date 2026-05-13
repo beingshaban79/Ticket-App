@@ -11,7 +11,7 @@ import styles from "./Styles";
  *  to        : string  e.g. "Electronic City"
  *  onPress   : function
  */
-const RouteCard = ({ routeName, from, to, onPress }) => {
+const RouteCard = ({ routeName, from, onPress }) => {
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.75}>
       <View style={styles.iconBox}>
@@ -19,7 +19,7 @@ const RouteCard = ({ routeName, from, to, onPress }) => {
       </View>
       <View style={styles.info}>
         <Text style={styles.routeName}>{routeName}</Text>
-        <Text style={styles.subtitle}>{from} → {to}</Text>
+        <Text style={styles.subtitle}>{from}</Text>
       </View>
       <MaterialIcons name="chevron-right" size={22} color="#9e9e9e" />
     </TouchableOpacity>
