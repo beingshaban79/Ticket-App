@@ -1,16 +1,15 @@
 import axios from 'axios';
+import { API_BASE_URL } from '@env';
 import { store } from '../store';
 
-const BASE_URL = 'https://conductor.arizolve.com';
-
 const axiosInstance = axios.create({
-  baseURL: BASE_URL,
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Request interceptor — attach token to every request automatically
+// Attach token to every request automatically
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = store.getState().auth.token;
@@ -22,14 +21,20 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor — log every response for debugging
+// Log every response
 axiosInstance.interceptors.response.use(
   (response) => {
-    console.log(`📡 [${response.config.method?.toUpperCase()}] ${response.config.url}`, JSON.stringify(response.data, null, 2));
+    console.log(
+      `📡 [${response.config.method?.toUpperCase()}] ${response.config.url}`,
+      JSON.stringify(response.data, null, 2)
+    );
     return response;
   },
   (error) => {
-    console.log(`❌ [${error.config?.method?.toUpperCase()}] ${error.config?.url}`, error.message);
+    console.log(
+      `❌ [${error.config?.method?.toUpperCase()}] ${error.config?.url}`,
+      error.message
+    );
     return Promise.reject(error);
   }
 );
