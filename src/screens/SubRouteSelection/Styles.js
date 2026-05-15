@@ -1,5 +1,5 @@
-import { StyleSheet } from "react-native";
-
+import { StyleSheet,Dimensions } from "react-native";
+const { width, height } = Dimensions.get("window");
 export default StyleSheet.create({
   container: {
     flex: 1,
@@ -10,7 +10,17 @@ export default StyleSheet.create({
     padding: 16,
     alignItems: "center",
   },
+headerRow:{
 
+     flexDirection: "row",
+     alignItems: "center",
+     paddingHorizontal: width * 0.04,
+     paddingVertical: height * 0.018,
+     backgroundColor: "#fff",
+     borderBottomWidth: 1,
+     borderBottomColor: "#efefef",
+
+},
   title: {
     fontSize: 18,
     fontWeight: "700",
@@ -55,7 +65,16 @@ export default StyleSheet.create({
     alignItems: "center",
     flex: 1,
   },
-
+ headerTitle: {
+    flex: 1,
+    textAlign: "center",
+    fontSize: width * 0.045,
+    fontWeight: "700",
+    color: "#212121",
+  },
+  headerRight: {
+    width: 32,
+  },
   iconBox: {
     width: 48,
     height: 48,
@@ -69,6 +88,8 @@ export default StyleSheet.create({
   icon: {
     fontSize: 20,
     color: "#137fec",
+    lineHeight: 22,
+    textAlign: "center",
   },
 
   cardText: {

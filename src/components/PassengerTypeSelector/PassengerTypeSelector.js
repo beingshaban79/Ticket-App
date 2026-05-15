@@ -3,30 +3,34 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import styles from "./Styles";
 
-const TYPES = [
-  { key: "adult",   label: "Adult",   icon: "person"        },
-  { key: "child",   label: "Child",   icon: "face"          },
-  { key: "luggage", label: "Luggage", icon: "work"          },
-];
+// Icon map keyed by lowercase type name
+const ICON_MAP = {
+  adult:   "person",
+  child:   "face",
+  luggage: "work",
+};
 
-const PassengerTypeSelector = ({ selected, onSelect }) => (
+const PassengerTypeSelector = ({ selected, onSelect, types = [] }) => (
   <View style={styles.row}>
-    {TYPES.map((type) => {
-      const isActive = selected === type.key;
+    {types.map((type) => {
+      // API sends "Adult", "Child", "Luggage" — compare case-insensitively
+      const isActive = selected?.toLowerCase() === type.toLowerCase();
+      const icon     = ICON_MAP[type.toLowerCase()] || "person";
+
       return (
         <TouchableOpacity
-          key={type.key}
+          key={type}
           style={[styles.item, isActive && styles.itemActive]}
-          onPress={() => onSelect(type.key)}
+          onPress={() => onSelect(type)}
           activeOpacity={0.8}
         >
           <MaterialIcons
-            name={type.icon}
+            name={icon}
             size={26}
             color={isActive ? "#fff" : "#212121"}
           />
           <Text style={[styles.label, isActive && styles.labelActive]}>
-            {type.label}
+            {type}
           </Text>
         </TouchableOpacity>
       );

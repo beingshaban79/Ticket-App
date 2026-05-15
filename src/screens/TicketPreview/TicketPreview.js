@@ -1,22 +1,61 @@
 import React from "react";
-import { View, ScrollView } from "react-native";
+import { View, ScrollView, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useDispatch, useSelector } from "react-redux";
+import { issueTicket } from "../../redux/slices/bookingSlice";
 import styles from "./Styles";
 import TicketPreviewCard from "../../components/TicketPreviewCard/TicketPreviewCard";
 import AppButton from "../../components/Button/Button";
 
 const TicketPreview = ({ navigation, route }) => {
-  const { from, to, passengerType, fare, distance } = route.params || {};
+  const dispatch = useDispatch();
+  const { isIssuing } = useSelector((state) => state.booking);
+
+  const {
+    from,
+    to,
+    fromStopId,
+    toStopId,
+    passengerType,
+    fare,
+    baseFare,
+    gst,
+    distance,
+    busNo,
+  } = route.params || {};
 
   const now  = new Date();
   const date = now.toLocaleDateString("en-GB");
-  const time = now.toLocaleTimeString("en-GB");
+  const time = now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 
   const fareItems = [
-    passengerType === "adult"   && { label: "फुल (Adult) x 1",  amount: `₹ ${fare || "100.00"}` },
-    passengerType === "child"   && { label: "आधा (Child) x 1",  amount: `₹ ${fare || "50.00"}`  },
-    passengerType === "luggage" && { label: "Luggage x 1",       amount: `₹ ${fare || "30.00"}`  },
-  ].filter(Boolean);
+    { label: `${passengerType || "Adult"} x 1`, amount: `₹ ${baseFare || fare || "0"}` },
+    ...(Number(gst) > 0
+      ? [{ label: "GST", amount: `₹ ${gst}` }]
+      : []),
+  ];
+
+  const handlePrint = async () => {
+    const result = await dispatch(issueTicket({
+      fromStopId:    fromStopId,
+      toStopId:      toStopId,
+      passengerType: passengerType || "Adult",
+    }));
+
+    // Show backend message regardless of success/failure
+    const message = result?.payload?.message || "Ticket issued.";
+    Alert.alert("", message, [
+      {
+        text: "OK",
+        onPress: () => {
+          // On success go back to booking, on failure stay
+          if (result?.payload?.status) {
+            navigation.goBack();
+          }
+        },
+      },
+    ]);
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -27,15 +66,13 @@ const TicketPreview = ({ navigation, route }) => {
         <TicketPreviewCard
           date={date}
           time={time}
-          seatNo="01"
-          from={from || "राठ"}
-          to={to || "झांसी"}
-          distance={distance || "71.4 Km"}
-          departure="9:00 AM"
+          from={from   || "—"}
+          to={to       || "—"}
+          distance={distance ? `${distance} km` : "—"}
+          passengerType={passengerType || "Adult"}
           fareItems={fareItems}
-          total={`₹ ${fare || "100.00"}`}
-          busNo="3334"
-          conductor="शयाम"
+          total={`₹ ${fare || "0"}`}
+          busNo={busNo || "—"}
         />
       </ScrollView>
 
@@ -43,8 +80,10 @@ const TicketPreview = ({ navigation, route }) => {
         <AppButton
           variant="primary"
           size="lg"
-          label="  Confirm & Print"
-          onPress={() => {}}
+          label="🖨  Print Ticket"
+          loading={isIssuing}
+          disabled={isIssuing}
+          onPress={handlePrint}
         />
       </View>
     </SafeAreaView>

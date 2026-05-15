@@ -6,44 +6,35 @@ import styles from "./Styles";
 const Divider = () => <View style={styles.divider} />;
 
 const TicketPreviewCard = ({
-  transportName = "ट्रांसपोर्ट नाम",
   date,
   time,
-  seatNo,
   from,
   to,
   distance,
-  departure,
+  passengerType,
   fareItems = [],
   total,
   busNo,
-  conductor,
 }) => (
   <View style={styles.card}>
 
-    {/* Blue Header — inside card */}
+    {/* Blue Header */}
     <View style={styles.cardHeader}>
       <Text style={styles.cardHeaderTitle}>Ticket Preview</Text>
       <MaterialIcons name="print" size={22} color="#fff" />
     </View>
 
-    {/* Transport Name */}
-    <View style={styles.transportSection}>
-      <Text style={styles.transportHindi}>{transportName}</Text>
-      <Text style={styles.transportEng}>Transport Name</Text>
-    </View>
-
     <Divider />
 
-    {/* Date / Time / Seat */}
+    {/* Date / Time */}
     <View style={styles.metaRow}>
       <View>
         <Text style={styles.metaText}>Date: {date}</Text>
         <Text style={styles.metaText}>Time: {time}</Text>
       </View>
-      <View style={styles.seatBox}>
+      <View style={styles.passengerBox}>
         <Text style={styles.seatLabel}>Seat No.</Text>
-        <Text style={styles.seatNo}>{seatNo}</Text>
+        <Text style={styles.seatNo}>{passengerType}</Text>
       </View>
     </View>
 
@@ -58,7 +49,6 @@ const TicketPreviewCard = ({
       <View style={styles.busCenter}>
         <MaterialIcons name="directions-bus" size={26} color="#137fec" />
         <Text style={styles.distance}>{distance}</Text>
-        <Text style={styles.departure}>Departure: {departure}</Text>
       </View>
       <View style={[styles.routeStop, styles.routeStopRight]}>
         <Text style={styles.stopLabel}>To</Text>
@@ -68,7 +58,7 @@ const TicketPreviewCard = ({
 
     <Divider />
 
-    {/* Fare Items */}
+    {/* Fare breakdown */}
     {fareItems.map((item, i) => (
       <View key={i} style={styles.fareRow}>
         <Text style={styles.fareLabel}>{item.label}</Text>
@@ -80,7 +70,7 @@ const TicketPreviewCard = ({
 
     {/* Total */}
     <View style={styles.totalRow}>
-      <Text style={styles.totalLabel}>कुल (Total)</Text>
+      <Text style={styles.totalLabel}>Total</Text>
       <Text style={styles.totalAmount}>{total}</Text>
     </View>
 
@@ -89,8 +79,7 @@ const TicketPreviewCard = ({
     {/* Footer */}
     <View style={styles.footer}>
       <Text style={styles.footerText}>Bus No: {busNo}</Text>
-      <Text style={styles.footerText}>Conductor: {conductor}</Text>
-      <Text style={styles.footerBold}>Happy Journey</Text>
+      <Text style={styles.footerBold}>Happy Journey 🎉</Text>
       <Text style={styles.footerText}>Not Transferable</Text>
     </View>
 

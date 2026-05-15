@@ -29,12 +29,17 @@ export default StyleSheet.create({
     paddingVertical: 24,
     paddingBottom: 100,
   },
+  button:{
+ width: '60%',
+    borderRadius: 100,
+    alignSelf:'center',
+    padding:10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   footer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
     backgroundColor: "#f2f3f5",
     padding: width * 0.05,
   },
+  
 });

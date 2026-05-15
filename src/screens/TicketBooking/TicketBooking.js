@@ -1,23 +1,32 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  BackHandler,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchBookingData } from "../../redux/slices/bookingSlice";
+import { useFocusEffect } from "@react-navigation/native";
+import {
+  fetchBookingData,
+  updateBookingSelection,
+  updateNextStop,
+  clearRouteCompleted,
+} from "../../redux/slices/bookingSlice";
 import styles from "./Styles";
-import StopInfoCard        from "../../components/StopInfoCard/StopInfoCard";
-import UpdateStopButton    from "../../components/UpdateStopButton/UpdateStopButton";
-import DropdownPicker      from "../../components/DropdownPicker/DropdownPicker";
-import PassengerTypeSelector from "../../components/PassengerTypeSelector/PassengerTypeSelector";
-import FareInfoRow         from "../../components/FareInfoRow/FareInfoRow";
-import TripStatsCard       from "../../components/TripStatsCard/TripStatsCard";
-import AppButton           from "../../components/Button/Button";
+import StopInfoCard           from "../../components/StopInfoCard/StopInfoCard";
+import UpdateStopButton       from "../../components/UpdateStopButton/UpdateStopButton";
+import DropdownPicker         from "../../components/DropdownPicker/DropdownPicker";
+import PassengerTypeSelector  from "../../components/PassengerTypeSelector/PassengerTypeSelector";
+import FareInfoRow            from "../../components/FareInfoRow/FareInfoRow";
+import TripStatsCard          from "../../components/TripStatsCard/TripStatsCard";
+import AppButton              from "../../components/Button/Button";
+import SubRouteCompletedModal from "../../components/SubRouteCompletedModal/SubRouteCompletedModal";
+import CancelRouteBottomModal from "../../components/CancelRouteBottomModal/CancelRouteBottomModal";
 
 const TicketBooking = ({ navigation, route }) => {
   const dispatch = useDispatch();
@@ -25,33 +34,81 @@ const TicketBooking = ({ navigation, route }) => {
 
   const {
     bus, stopsContext, dropdowns, selection, quote, summary,
-    isLoading, error,
+    isLoading, isUpdating, isUpdatingStop, routeCompleted, error,
   } = useSelector((state) => state.booking);
 
-  // Fetch booking data on mount
+  const [cancelModalVisible, setCancelModalVisible] = useState(false);
+
+  // Initial load
   useEffect(() => {
     dispatch(fetchBookingData({ routeId, subRoute }));
   }, []);
 
+  // Block hardware back button on Android
+  useFocusEffect(
+    React.useCallback(() => {
+      const subscription = BackHandler.addEventListener("hardwareBackPress", () => true);
+      return () => subscription.remove();
+    }, [])
+  );
+
   // ── Derived values ──
-  const fromItems  = dropdowns?.from?.map((s) => s.stop_name)  || [];
-  const toItems    = dropdowns?.to?.map((s) => s.stop_name)    || [];
-  const paxTypes   = dropdowns?.passenger_types                 || [];
+  const fromItems   = dropdowns?.from?.map((s) => s.stop_name) || [];
+  const toItems     = dropdowns?.to?.map((s) => s.stop_name)   || [];
+  const paxTypes    = dropdowns?.passenger_types               || [];
 
   const currentStop = stopsContext?.current_stop?.stop_name || "—";
   const lastStop    = stopsContext?.last_stop?.stop_name    || "—";
   const nextStop    = stopsContext?.next_stop?.stop_name    || "—";
 
-  const fromStop    = selection?.from_stop_id
-    ? dropdowns?.from?.find((s) => s.id === selection.from_stop_id)?.stop_name || "—"
-    : fromItems[0] || "—";
-
-  const toStop      = selection?.to_stop_id
-    ? dropdowns?.to?.find((s) => s.id === selection.to_stop_id)?.stop_name || "—"
+  const currentToId = selection?.to_stop_id;
+  const toStop      = currentToId
+    ? dropdowns?.to?.find((s) => s.id === currentToId)?.stop_name || toItems[0] || "—"
     : toItems[0] || "—";
 
+  const fromStop    = dropdowns?.from?.[0]?.stop_name || "—";
   const selectedPax = selection?.passenger_type || paxTypes[0] || "Adult";
 
+  // ── Passenger type change ──
+  const handlePaxChange = (type) => {
+    dispatch(updateBookingSelection({
+      routeId,
+      subRoute,
+      toStopId:      currentToId,
+      passengerType: type,
+    }));
+  };
+
+  // ── To stop change ──
+  const handleToStopChange = (stopName) => {
+    const stopObj = dropdowns?.to?.find((s) => s.stop_name === stopName);
+    if (!stopObj) return;
+    dispatch(updateBookingSelection({
+      routeId,
+      subRoute,
+      toStopId:      stopObj.id,
+      passengerType: selectedPax,
+    }));
+  };
+
+  // ── Update to next stop ──
+  const handleUpdateStop = () => {
+    dispatch(updateNextStop());
+  };
+
+  // ── Route completed modal close → go back to route selection ──
+  const handleRouteCompleted = () => {
+    dispatch(clearRouteCompleted());
+    navigation.navigate("App");
+  };
+
+  // ── Cancel route confirmed → go back to SubRouteSelection ──
+  const handleCancelRoute = () => {
+    setCancelModalVisible(false);
+    navigation.goBack(); // back to SubRouteSelection
+  };
+
+  // ── Full screen loader on initial load ──
   if (isLoading) {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -73,13 +130,14 @@ const TicketBooking = ({ navigation, route }) => {
   return (
     <SafeAreaView style={styles.safeArea}>
 
-      {/* Header */}
+      {/* Header — back disabled, three-dots opens cancel modal */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.menuBtn}>
-          <MaterialIcons name="arrow-back" size={24} color="#212121" />
-        </TouchableOpacity>
+        <View style={styles.menuBtn} />
         <Text style={styles.headerTitle}>{routeName || "Ticket Booking"}</Text>
-        <TouchableOpacity style={styles.menuBtn}>
+        <TouchableOpacity
+          style={styles.menuBtn}
+          onPress={() => setCancelModalVisible(true)}
+        >
           <MaterialIcons name="more-vert" size={24} color="#212121" />
         </TouchableOpacity>
       </View>
@@ -95,10 +153,22 @@ const TicketBooking = ({ navigation, route }) => {
           nextStop={nextStop}
         />
 
-        {/* Update Stop */}
-        <UpdateStopButton onPress={() => {}} />
+        {/* Updating stop loader — shown inline below StopInfoCard */}
+        {isUpdatingStop && (
+          <ActivityIndicator
+            size="small"
+            color="#137fec"
+            style={{ marginBottom: 8 }}
+          />
+        )}
 
-        {/* From */}
+        {/* Update to Next Stop */}
+        <UpdateStopButton
+          onPress={handleUpdateStop}
+          loading={isUpdatingStop}
+        />
+
+        {/* From — fixed */}
         <DropdownPicker
           label="From"
           value={fromStop}
@@ -106,18 +176,18 @@ const TicketBooking = ({ navigation, route }) => {
           onChange={() => {}}
         />
 
-        {/* To */}
+        {/* To — triggers API update */}
         <DropdownPicker
           label="To"
           value={toStop}
           items={toItems}
-          onChange={() => {}}
+          onChange={handleToStopChange}
         />
 
-        {/* Passenger Type */}
+        {/* Passenger Type — triggers API update */}
         <PassengerTypeSelector
           selected={selectedPax}
-          onSelect={() => {}}
+          onSelect={handlePaxChange}
           types={paxTypes}
         />
 
@@ -127,13 +197,13 @@ const TicketBooking = ({ navigation, route }) => {
           fare={quote ? `₹${quote.total}` : "—"}
         />
 
-        {/* Trip Stats — from API summary */}
+        {/* Trip Stats */}
         <TripStatsCard
-          totalTickets={String(summary?.total_tickets_so_far   ?? "—")}
-          totalFare={`₹${summary?.total_fare_so_far            ?? "—"}`}
+          totalTickets={String(summary?.total_tickets_so_far        ?? "—")}
+          totalFare={`₹${summary?.total_fare_so_far                 ?? "—"}`}
           passengersOut={String(summary?.passenger_out_in_next_stop ?? "—")}
-          availableSeats={String(summary?.total_available_seats ?? "—")}
-          bookedSeats={String(summary?.current_booked_seats    ?? "—")}
+          availableSeats={String(summary?.total_available_seats     ?? "—")}
+          bookedSeats={String(summary?.current_booked_seats         ?? "—")}
         />
       </ScrollView>
 
@@ -145,15 +215,35 @@ const TicketBooking = ({ navigation, route }) => {
           label="🖨  Confirm and Print"
           onPress={() =>
             navigation.navigate("TicketPreview", {
+              routeName,
               from:          fromStop,
               to:            toStop,
+              fromStopId:    dropdowns?.from?.[0]?.id ?? null,
+              toStopId:      currentToId              ?? null,
               passengerType: selectedPax,
-              fare:          String(quote?.total  ?? "0"),
-              distance:      `${quote?.distance_km ?? 0} km`,
+              fare:          String(quote?.total       ?? "0"),
+              baseFare:      String(quote?.base_fare   ?? "0"),
+              gst:           String(quote?.gst         ?? "0"),
+              distance:      String(quote?.distance_km ?? "0"),
+              busNo:         bus?.bus_number            ?? "—",
+              busId:         bus?.bus_id                ?? null,
             })
           }
         />
       </View>
+
+      {/* Sub-route completed modal — shown when no next stop */}
+      <SubRouteCompletedModal
+        visible={routeCompleted}
+        onClose={handleRouteCompleted}
+      />
+
+      {/* Cancel route modal — opened via three-dots */}
+      <CancelRouteBottomModal
+        visible={cancelModalVisible}
+        onClose={() => setCancelModalVisible(false)}
+        onConfirm={handleCancelRoute}
+      />
 
     </SafeAreaView>
   );
