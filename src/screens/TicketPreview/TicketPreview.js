@@ -269,6 +269,7 @@ const TicketPreview = ({ navigation, route }) => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
+        style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
       >
         <TicketPreviewCard

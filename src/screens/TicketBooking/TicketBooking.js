@@ -144,6 +144,7 @@ const TicketBooking = ({ navigation, route }) => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
+        style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
       >
         {/* Stop Info */}
@@ -205,9 +206,7 @@ const TicketBooking = ({ navigation, route }) => {
           availableSeats={String(summary?.total_available_seats     ?? "—")}
           bookedSeats={String(summary?.current_booked_seats         ?? "—")}
         />
-      </ScrollView>
-
-      {/* Confirm and Print */}
+       {/* Confirm and Print */}
       <View style={styles.footer}>
         <AppButton
           variant="primary"
@@ -231,6 +230,10 @@ const TicketBooking = ({ navigation, route }) => {
           }
         />
       </View>
+     
+      </ScrollView>
+
+    
 
       {/* Sub-route completed modal — shown when no next stop */}
       <SubRouteCompletedModal

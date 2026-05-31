@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from "react-native";
+
 const { width } = Dimensions.get("window");
 
 export default StyleSheet.create({
@@ -6,40 +7,20 @@ export default StyleSheet.create({
     flex: 1,
     backgroundColor: "#f2f3f5",
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: width * 0.04,
-    paddingVertical: 14,
-    backgroundColor: "#137fec",
-    borderRadius: 16,
-   
-  },
-  backBtn: {
-    padding: 4,
-    width: 32,
-  },
-  headerTitle: {
-    fontSize: width * 0.045,
-    fontWeight: "700",
-    color: "#fff",
+  scroll: {
+    flex: 1,
   },
   scrollContent: {
     paddingVertical: 24,
-    paddingBottom: 100,
+    paddingHorizontal: width * 0.04,
+    paddingBottom: width * 0.04,
   },
-  button:{
- width: '60%',
-    borderRadius: 100,
-    alignSelf:'center',
-    padding:10,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  // Footer sits naturally — no absolute positioning
   footer: {
     backgroundColor: "#f2f3f5",
     padding: width * 0.05,
+    borderTopWidth: 1,
+    borderTopColor: "#e0e0e0",
+    gap: 10,
   },
-  
 });

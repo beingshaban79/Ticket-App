@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from "react-native";
+
 const { width } = Dimensions.get("window");
 
 export default StyleSheet.create({
@@ -25,15 +26,16 @@ export default StyleSheet.create({
     fontWeight: "700",
     color: "#212121",
   },
+  // ScrollView grows to fill space between header and footer
+  scroll: {
+    flex: 1,
+  },
   scrollContent: {
     padding: width * 0.04,
-    paddingBottom: 100,
+    paddingBottom: width * 0.04,
   },
+  // Footer sits naturally — no absolute positioning
   footer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
     backgroundColor: "#fff",
     padding: width * 0.04,
     borderTopWidth: 1,

@@ -2,6 +2,7 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Dimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import HomeStack from "./HomeStack";
 import Reports from "../screens/reports/Reports";
 import Support from "../screens/support/Support";
@@ -10,6 +11,8 @@ const Tab = createBottomTabNavigator();
 const { width } = Dimensions.get("window");
 
 export default function AppNavigation() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -20,8 +23,9 @@ export default function AppNavigation() {
           backgroundColor: "#fff",
           borderTopWidth: 1,
           borderTopColor: "#ddd",
-          height: 60,
-          paddingBottom: 8,
+          // Height = base 60 + system nav bar inset
+          height: 60 + insets.bottom,
+          paddingBottom: 8 + insets.bottom,
           paddingTop: 6,
         },
         tabBarLabelStyle: {
